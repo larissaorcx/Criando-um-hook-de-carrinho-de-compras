@@ -23,20 +23,51 @@ const CartContext = createContext<CartContextData>({} as CartContextData);
 
 export function CartProvider({ children }: CartProviderProps): JSX.Element {
   const [cart, setCart] = useState<Product[]>(() => {
-    // const storagedCart = Buscar dados do localStorage
+    const storagedCart = localStorage.getItem('@RocketShoes:cart')
 
-    // if (storagedCart) {
-    //   return JSON.parse(storagedCart);
-    // }
+    if (storagedCart) {
+      return JSON.parse(storagedCart);
+    }
 
     return [];
   });
 
   const addProduct = async (productId: number) => {
     try {
-      // TODO
+
+      const stockProduct = await api.get(`/stock/${productId}`)
+      .then(response => response.data.amount)
+
+      const newCart = [...cart]
+
+      const sameValue = newCart.find(indice => indice.id === productId)
+      
+      for(let i = 0; i < cart.length; i++){
+        console.log('sameValue', sameValue)
+        if (sameValue){
+          
+          if(stockProduct < newCart[i].amount){
+            newCart[i].amount += 1
+          }else{
+            toast.error('Quantidade solicitada fora de estoque');
+          }
+        }else{
+          const initialProduct = await api.get(`/products/${productId}`);
+
+          const newProduct = {
+            ...initialProduct.data,
+            amount: 1
+          }
+          newCart.push(newProduct)
+        }     
+      };
+     
+      setCart(newCart)
+      
+      localStorage.setItem('@RocketShoes:cart', JSON.stringify(newCart));
+
     } catch {
-      // TODO
+      toast.error('Erro na adição do produto');
     }
   };
 
@@ -44,7 +75,7 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
     try {
       // TODO
     } catch {
-      // TODO
+      toast.error('Erro na remoção do produto');
     }
   };
 
@@ -55,7 +86,7 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
     try {
       // TODO
     } catch {
-      // TODO
+      toast.error('Erro na alteração de quantidade do produto');
     }
   };
 

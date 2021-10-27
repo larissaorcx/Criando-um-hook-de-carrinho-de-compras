@@ -27,6 +27,8 @@ const Home = (): JSX.Element => {
   const { addProduct, cart } = useCart();
 
   const cartItemsAmount = cart.reduce((sumAmount, product) => {
+
+
     if (sumAmount.hasOwnProperty(product.id)){
       sumAmount[product.id] += product.amount;
     }
@@ -55,7 +57,6 @@ const Home = (): JSX.Element => {
   function handleAddProduct(id: number) {
     addProduct(id)
   }
-
   return (
     <ProductList>
       {products.map(product => (

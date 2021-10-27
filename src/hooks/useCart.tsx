@@ -93,9 +93,11 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
     amount,
   }: UpdateProductAmount) => {
     try {
+      console.log("entrou")
+
       const updateAmount = [...cart]
 
-      const products = await api.get(`/stock${productId}`)
+      const productAmount = await api.get(`/stock/${productId}`)
       .then(response => response.data.amount)
 
       const productIndex = updateAmount.findIndex(indice => indice.id === productId)
@@ -104,10 +106,19 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
         if(updateAmount[productIndex].amount <= 0){
           return
         }
-        if ((updateAmount[productIndex].amount + amount) <= products){
-          updateAmount[productIndex].amount += amount
-        }else{
-          toast.error('Quantidade solicitada fora de estoque');
+        if(amount === 1){
+          if ((updateAmount[productIndex].amount) < productAmount){
+            updateAmount[productIndex].amount += amount
+          }else{
+            toast.error('Quantidade solicitada fora de estoque');
+          }
+        }
+        if(amount === -1){
+          if ((updateAmount[productIndex].amount) <= productAmount){
+            updateAmount[productIndex].amount += amount
+          }else{
+            toast.error('Quantidade solicitada fora de estoque');
+          }
         }
       }
 
